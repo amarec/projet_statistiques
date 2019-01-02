@@ -1,0 +1,7 @@
+---
+title: "Projet de statistiques"
+author: "Aude Marêché"
+date: "02/01/2019"
+output: html_document
+---
+
