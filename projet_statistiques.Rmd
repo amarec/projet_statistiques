@@ -5,3 +5,5 @@ date: "02/01/2019"
 output: html_document
 ---
 
+Ce travail porte sur les préférences des consommateurs de bonbons. À partir des résultats d’un sondage d’opinion sur les préférence en matière de bonbons des sondés, et des informations nutritionnelles sur ces bonbons, et plus spécifiquement la quantité de sucre qu'ils contiennent, nous allons tenter de déterminer si les sondés préfèrent les bonbons les plus sucrés.
+
