@@ -5,5 +5,24 @@ date: "02/01/2019"
 output: html_document
 ---
 
+
 Ce travail porte sur les préférences des consommateurs de bonbons. À partir des résultats d’un sondage d’opinion sur les préférence en matière de bonbons des sondés, et des informations nutritionnelles sur ces bonbons, et plus spécifiquement la quantité de sucre qu'ils contiennent, nous allons tenter de déterminer si les sondés préfèrent les bonbons les plus sucrés.
 
+
+Génération des données :
+
+```{r}
+bonbons <- c("menthe", "fraiseT", "caramel", "miel", "orange", "oeuf", "pomme_mou", "cola", "reglisse", "pomme_dur")
+ten_sucre <- c(83, 74, 73, 70, 68, 60, 46, 43, 38, 34)
+infos_nutri <- data.frame(bonbon = bonbons, ten_sucre = ten_sucre)
+
+set.seed(2)
+sondage <- data.frame()
+for (r in c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J")) {
+  sondage <- rbind(sondage, data.frame(
+    rep = r,
+    bonbon = bonbons,
+    rang = sample(c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10), prob = ten_sucre)))
+}
+set_seed(NULL)
+```
