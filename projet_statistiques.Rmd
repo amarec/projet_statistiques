@@ -5,9 +5,7 @@ date: "02/01/2019"
 output: html_document
 ---
 
-
-Ce travail porte sur les préférences des consommateurs de bonbons. À partir des résultats d’un sondage d’opinion sur les préférence en matière de bonbons des sondés, et des informations nutritionnelles sur ces bonbons, et plus spécifiquement la quantité de sucre qu'ils contiennent, nous allons tenter de déterminer si les sondés préfèrent les bonbons les plus sucrés.
-
+Ce travail porte sur les préférences des consommateurs de bonbons. À partir des résultats d’un sondage d’opinion sur les préférences en matière de bonbons des personnes interrogées, et des informations nutritionnelles sur ces bonbons, plus spécifiquement la quantité de sucre qu'ils contiennent, nous allons tenter de déterminer si ces personnes préfèrent les bonbons les plus sucrés.
 
 Génération des données :
 
@@ -28,11 +26,43 @@ set.seed(NULL)
 ```
 
 ```{r}
-score <-dplyr::summarise(dplyr::group_by(sondage, bonbon), score = sum(rang))
-score
+infos_nutri
 ```
+
+Le sondage porte sur dix bonbons : fraise Tagada (`fraiseT`), rouleau de réglisse (`reglisse`), bonbon à la cola (`cola`), caramel mou (`caramel`), bonbon mou à la pomme (`pomme_mou`), bonbon œuf (`oeuf`), bonbon collant à l'orange (`orange`), bonbon dur à la pomme (`pomme_dur`), bonbon au miel (`miel`) et bonbon à la menthe (`menthe`). `ten_sucre` correspond à la quantité de sucre présente dans 100 grammes de bonbons, en grammes.
+À chacun de ces bonbons a été attribué un rang (de 1 à 10) par chaque sondé (identifié par une lettre), par ordre de préférence. On obtient donc un score pour chaque bonbon, de sorte que les bonbons possédant les plus petits scores sont les plus appréciés. Pour résumer les choix des sondés, nous calculons la somme des rangs pour chaque bonbon (ce qui revient au même que calculer le score moyen pour chaque bonbon) :
+
+```{r}
+scores <- merge(dplyr::summarise(dplyr::group_by(sondage, bonbon), score = sum(rang)), infos_nutri)
+scores[order(scores$score),]
+```
+
+Faisons un premier graphe pour visualiser les données :
 
 ```{r}
 ggplot2::ggplot(merge(sondage, infos_nutri), ggplot2::aes(ten_sucre, rang, group = bonbon)) + ggplot2::geom_boxplot()
-ggplot2::ggplot(merge(score, infos_nutri), ggplot2::aes(ten_sucre, score)) + ggplot2::geom_point()
 ```
+
+Tableau des variances :
+
+```{r}
+dplyr::summarise(dplyr::group_by(sondage, bonbon), variance = var(rang))
+```
+
+Malgré la variance parfois élevée dans les rangs de certains bonbons, et des différences importantes entre bonbons, une tendance semble se dégager :
+
+```{r}
+lm(ten_sucre ~ scores$score)
+ggplot2::ggplot(merge(scores, infos_nutri), ggplot2::aes(ten_sucre, score)) + ggplot2::geom_point() #+ ggplot2::geom_abline(lm(ten_sucre ~ scores$score))
+```
+
+Il semblerait que les bonbons qui ont une plus forte teneur en sucre ont des scores moins élevés et seraient donc plus appréciés; notre hypothèse est celle d'une corrélation entre la teneur en sucre des bonbons et les rangs qui leurs ont été attribués .
+Pour tenter de confirmer cela, nous allons effectuer un test de corrélation en utilisant le coefficient de Pearson.
+
+```{r}
+cor.test(scores$ten_sucre, scores$score)
+```
+
+On constate que la valeur du coefficient de Pearson est dans le cas présent inférieure à `-0.7`; il y a donc une forte corrélation entre la teneur en sucre et les scores des bonbons. La corrélation est négative car le coefficient directeur de la droite correspondant à la régression linéaire sur les données est négatif : comme mentionné ci-dessus, les scores étant à l'origine des rangs, un score plus bas est en réalité un meilleur score; la pente de la droite est donc descendante. La p-valeur est quand à elle inférieure à 0.05, et très proche de 0.01; l'on peut donc considérer que ces résultats ont de bonnes chances d'être fiables.
+
+Nous pouvons donc valider notre hypothèse de corrélation entre la teneur en sucre et les préférences des sondés : les personnes interrogées préfèrent effectivement les bonbons les plus sucrés.
